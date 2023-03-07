@@ -11,6 +11,7 @@ RUN go build -o fake-jwt-server
 FROM alpine:3.17
 
 WORKDIR /app
+COPY private.pem .
 COPY form.html .
 COPY --from=builder /build/fake-jwt-server .
 
