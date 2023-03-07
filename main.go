@@ -3,9 +3,12 @@ package main
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"text/template"
@@ -30,13 +33,25 @@ type JwtForm struct {
 	Expiry           int64  `json:"exp"`
 }
 
+func generateKey() (*rsa.PrivateKey, error) {
+	key, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		return nil, err
+	}
+	return key, nil
+}
+
 func main() {
+	viper.SetEnvPrefix("FAKE_JWT_SERVER")
+	viper.AutomaticEnv()
+
 	viper.SetDefault("issuer", "http://localhost:8080")
 	viper.SetDefault("subject", "fb8618e6-8639-454d-9f94-4496b0b224a8")
 	viper.SetDefault("audience", "http://localhost:3000")
 	viper.SetDefault("scope", "openid profile email")
 	viper.SetDefault("authorizing_party", "example-azp")
 	viper.SetDefault("callback_uri", "http://localhost:3000/auth/callback")
+	viper.SetDefault("generate_rsa_key", false)
 
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
@@ -48,14 +63,45 @@ func main() {
 		}
 	}
 
-	key, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		fmt.Printf("failed to generate new RSA private key: %s\n", err)
-		return
+	var key *rsa.PrivateKey
+	var err error
+	if viper.GetBool("generate_rsa_key") {
+		log.Info("Generating new RSA key")
+		key, err = generateKey()
+		if err != nil {
+			log.Errorf("failed to generate new RSA private key: %s", err)
+			return
+		}
+	} else {
+		log.Info("Using existing RSA key")
+		data, err := ioutil.ReadFile("private.pem")
+		if err != nil {
+			log.Errorf("failed to read private.pem file: %s", err)
+			return
+		}
+
+		block, _ := pem.Decode(data)
+		if block == nil {
+			log.Errorf("failed to decode PEM")
+			return
+		}
+
+		parsed, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+		if err != nil {
+			log.Errorf("failed to parse PKCS8 private key: %s", err)
+			return
+		}
+
+		var ok bool
+		key, ok = parsed.(*rsa.PrivateKey)
+		if !ok {
+			log.Errorf("key is not an RSA private key")
+			return
+		}
 	}
 
 	n := base64.StdEncoding.EncodeToString(key.N.Bytes())
-	log.Info("Generated new RSA key: ", n)
+	log.Info("Got RSA key: ", n)
 
 	jwks := makeJWKS(key)
 	if jwks == "" {
