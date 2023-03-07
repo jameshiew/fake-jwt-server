@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -52,6 +53,9 @@ func main() {
 		fmt.Printf("failed to generate new RSA private key: %s\n", err)
 		return
 	}
+
+	n := base64.StdEncoding.EncodeToString(key.N.Bytes())
+	log.Info("Generated new RSA key: ", n)
 
 	jwks := makeJWKS(key)
 	if jwks == "" {
