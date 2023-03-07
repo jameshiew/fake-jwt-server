@@ -7,7 +7,7 @@ Small HTTP service that is meant to approximate some parts of the [Auth0 browser
 - can use either the provided RSA key in `private.pem` for signing JWTs, or one randomly generated at startup
 - serves a JSON Web Key Set (JWKS) at `/.well-known/jwks.json`
 - `/authorize` offers up a HTML form for generating JWTs, that can also be prefilled with values from query parameters
-- `POST`ing to `/authorize` will cause a redirect to the callback URL (`http://locahost:3000/auth/callback` by default) with the JWT in the `access_token` field of the `location.hash`
+- `POST`ing to `/authorize` will cause a redirect to the callback URL (`http://localhost:3000/auth/callback` by default) with the JWT in the `access_token` field of the `location.hash`
 
 ## Quickstart
 
