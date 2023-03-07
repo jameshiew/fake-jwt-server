@@ -1,0 +1,87 @@
+name: Build Docker images
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        required: true
+        description: "Tag for the image"
+  schedule:
+    - cron: 30 12 * * TUE
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/docker.yml
+      - Dockerfile
+      - form.html
+      - go.mod
+      - go.sum
+      - main.go
+
+env:
+  IMAGE_NAME: fake-jwt-server
+  IMAGE_TAG: "${{ github.sha }}"
+
+jobs:
+  override-envvars:
+    runs-on: ubuntu-22.04
+    outputs:
+      IMAGE_TAG: ${{ steps.set_outputs.outputs.IMAGE_TAG }}
+    steps:
+      - if: github.event_name == 'workflow_dispatch'
+        name: Set envvars from input
+        run: |
+          echo "IMAGE_TAG=${{ inputs.tag }}" >> $GITHUB_ENV
+      - if: github.event_name == 'schedule'
+        name: Set envvars from date
+        run: |
+          echo "IMAGE_TAG=${{ env.IMAGE_TAG }}-$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+      - name: Forward envvars to later jobs
+        id: set_outputs
+        run: |
+          echo "IMAGE_TAG=${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
+
+  build:
+    runs-on: ${{ matrix.runs_on }}
+    needs:
+      - override-envvars
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            runs_on: ubuntu-22.04
+          - arch: arm64
+            runs_on: buildjet-2vcpu-ubuntu-2204-arm
+    steps:
+      - run: |
+          echo "IMAGE=${{secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ needs.override-envvars.outputs.IMAGE_TAG }}" >> $GITHUB_ENV
+      - uses: actions/checkout@v3
+      - uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - run: |
+          docker build \
+            --platform linux/${{ matrix.arch }} \
+            -t $IMAGE-${{ matrix.arch }} \
+            .
+      - run: docker push $IMAGE-${{ matrix.arch }}
+
+  push-multiarch-manifest:
+    runs-on: ubuntu-22.04
+    needs:
+      - override-envvars
+      - build
+    steps:
+      - run: |
+          echo "IMAGE=${{secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ needs.override-envvars.outputs.IMAGE_TAG }}" >> $GITHUB_ENV
+      - uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - run: |
+          docker manifest create $IMAGE \
+            --amend $IMAGE-amd64 \
+            --amend $IMAGE-arm64
+      - run: docker manifest push --purge $IMAGE
