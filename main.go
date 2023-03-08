@@ -141,7 +141,7 @@ func main() {
 			}
 
 			issuedAt := time.Now()
-			expiry := issuedAt.Add(time.Minute * 5)
+			expiry := issuedAt.Add(time.Hour * 24 * 365)
 
 			jwt := JwtForm{
 				Issuer:           viper.GetString("issuer"),
