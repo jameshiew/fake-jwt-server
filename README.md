@@ -1,4 +1,4 @@
-# fake-jwt-server
+# fake-jwt-server [![Docker Hub pulls](https://img.shields.io/docker/pulls/jameshiew/fake-jwt-server?style=flat-square)](https://hub.docker.com/r/jameshiew/fake-jwt-server/tags)
 
 :warning: This service is for local/development use only.
 
