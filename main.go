@@ -41,16 +41,25 @@ func generateKey() (*rsa.PrivateKey, error) {
 	return key, nil
 }
 
+const (
+	DefaultIssuerConfigKey           = "default_issuer"
+	DefaultSubjectConfigKey          = "default_subject"
+	DefaultAudienceConfigKey         = "default_audience"
+	DefaultScopeConfigKey            = "default_scope"
+	DefaultAuthorizingPartyConfigKey = "default_authorizing_party"
+	GenerateRSAKeyConfigKey          = "generate_rsa_key"
+)
+
 func main() {
 	viper.SetEnvPrefix("FAKE_JWT_SERVER")
 	viper.AutomaticEnv()
 
-	viper.SetDefault("issuer", "http://localhost:8080")
-	viper.SetDefault("subject", "auth0|fb8618e6-8639-454d-9f94-4496b0b224a8")
-	viper.SetDefault("audience", "http://localhost:3000")
-	viper.SetDefault("scope", "openid profile email")
-	viper.SetDefault("authorizing_party", "example-azp")
-	viper.SetDefault("generate_rsa_key", false)
+	viper.SetDefault(DefaultIssuerConfigKey, "http://localhost:8080")
+	viper.SetDefault(DefaultSubjectConfigKey, "auth0|fb8618e6-8639-454d-9f94-4496b0b224a8")
+	viper.SetDefault(DefaultAudienceConfigKey, "http://localhost:3000")
+	viper.SetDefault(DefaultScopeConfigKey, "openid profile email")
+	viper.SetDefault(DefaultAuthorizingPartyConfigKey, "example-azp")
+	viper.SetDefault(GenerateRSAKeyConfigKey, false)
 
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
@@ -64,7 +73,7 @@ func main() {
 
 	var key *rsa.PrivateKey
 	var err error
-	if viper.GetBool("generate_rsa_key") {
+	if viper.GetBool(GenerateRSAKeyConfigKey) {
 		log.Info("Generating new RSA key")
 		key, err = generateKey()
 		if err != nil {
@@ -126,25 +135,25 @@ func main() {
 		if r.Method == "GET" {
 			audience := r.FormValue("audience")
 			if audience == "" {
-				audience = viper.GetString("audience")
+				audience = viper.GetString(DefaultAudienceConfigKey)
 			}
 
 			authorizing_party := r.FormValue("client_id")
 			if authorizing_party == "" {
-				authorizing_party = viper.GetString("authorizing_party")
+				authorizing_party = viper.GetString(DefaultAuthorizingPartyConfigKey)
 			}
 
 			scope := r.FormValue("scope")
 			if scope == "" {
-				scope = viper.GetString("scope")
+				scope = viper.GetString(DefaultScopeConfigKey)
 			}
 
 			issuedAt := time.Now()
 			expiry := issuedAt.Add(time.Hour * 24 * 365)
 
 			jwt := JwtForm{
-				Issuer:           viper.GetString("issuer"),
-				Subject:          viper.GetString("subject"),
+				Issuer:           viper.GetString(DefaultIssuerConfigKey),
+				Subject:          viper.GetString(DefaultSubjectConfigKey),
 				Audience:         audience,
 				AuthorizingParty: authorizing_party,
 				Scope:            scope,
