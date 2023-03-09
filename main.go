@@ -206,6 +206,7 @@ func main() {
 				// if no redirect is specifed, we just return the JWT
 				w.Header().Set("Content-Type", "text/plain")
 				w.Write(buf)
+				return
 			}
 			redirect_uri = redirect_uri + "#access_token=" + string(buf)
 			http.Redirect(w, r, redirect_uri, http.StatusSeeOther)
