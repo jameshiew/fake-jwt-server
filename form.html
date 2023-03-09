@@ -1,27 +1,42 @@
+<!DOCTYPE html>
 <html>
-    <head>
-        <title>Generate a signed JWT</title>
-    </head>
-    <body>
-        <form method="POST" id="jwt" enctype="multipart/form-data">
-            <label>Subject:</label><br />
-            <input type="text" name="sub" value="{{ .Subject }}"><br />
-            <hr />
-            <label>Scope:</label><br />
-            <input type="text" name="scope" value="{{ .Scope }}"><br />
-            <label>IssuedAt:</label><br />
-            <input type="number" name="iat" value="{{ .IssuedAt }}"><br />
-            <label>Expiry:</label><br />
-            <input type="number" name="exp" value="{{ .Expiry }}"><br />
-            <hr />
-            <label>Issuer:</label><br />
-            <input type="text" name="iss" value="{{ .Issuer }}"><br />
-            <label>AuthorizingParty:</label><br />
-            <input type="text" name="azp" value="{{ .AuthorizingParty }}"><br />
-            <label>Audience:</label><br />
-            <input type="text" name="aud" value="{{ .Audience }}"><br />
-            <hr />
-            <input type="submit" value="Submit">
-        </form>
-    </body>
+  <head>
+    <meta charset="utf-8" />
+    <title>Generate a signed JWT</title>
+  </head>
+  <body>
+    <form method="POST" id="jwt" enctype="multipart/form-data">
+      <label>Subject:</label><br />
+      <input type="text" name="sub" value="{{ .Subject }}" /><br />
+      <hr />
+      <label>Scope:</label><br />
+      <input type="text" name="scope" value="{{ .Scope }}" /><br />
+      <label>IssuedAt:</label><br />
+      <input type="number" name="iat" value="{{ .IssuedAt }}" /><br />
+      <label>Expiry:</label><br />
+      <input type="number" name="exp" value="{{ .Expiry }}" /><br />
+      <hr />
+      <label>Issuer:</label><br />
+      <input type="text" name="iss" value="{{ .Issuer }}" /><br />
+      <label>AuthorizingParty:</label><br />
+      <input type="text" name="azp" value="{{ .AuthorizingParty }}" /><br />
+      <label>Audience:</label><br />
+      <input type="text" name="aud" value="{{ .Audience }}" /><br />
+      <hr />
+      <input type="submit" value="Submit" />
+      <p id="info"></p>
+    </form>
+    <script>
+      const params = new URLSearchParams(document.location.search);
+      const redirect_uri = params.get("redirect_uri");
+      if (redirect_uri === null) {
+        document.getElementById("info").innerHTML =
+          "No `redirect_uri` query param - submitting this form will respond with the signed JWT";
+      } else {
+        document.getElementById("info").innerHTML =
+          "`redirect_uri` present - submitting this form will redirect to " +
+          redirect_uri;
+      }
+    </script>
+  </body>
 </html>

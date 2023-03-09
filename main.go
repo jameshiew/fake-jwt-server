@@ -50,7 +50,6 @@ func main() {
 	viper.SetDefault("audience", "http://localhost:3000")
 	viper.SetDefault("scope", "openid profile email")
 	viper.SetDefault("authorizing_party", "example-azp")
-	viper.SetDefault("redirect_uri", "http://localhost:3000/auth/callback")
 	viper.SetDefault("generate_rsa_key", false)
 
 	viper.SetConfigName("config")
@@ -202,9 +201,13 @@ func main() {
 			}
 			log.Debug("Signed JWT: ", string(buf))
 
-			redirect_uri := viper.GetString("redirect_uri")
+			redirect_uri := r.FormValue("redirect_uri")
+			if redirect_uri == "" {
+				// if no redirect is specifed, we just return the JWT
+				w.Header().Set("Content-Type", "text/plain")
+				w.Write(buf)
+			}
 			redirect_uri = redirect_uri + "#access_token=" + string(buf)
-
 			http.Redirect(w, r, redirect_uri, http.StatusSeeOther)
 		}
 	})
