@@ -8,8 +8,8 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"strconv"
 	"text/template"
 	"time"
@@ -73,7 +73,7 @@ func main() {
 		}
 	} else {
 		log.Info("Using existing RSA key")
-		data, err := ioutil.ReadFile("private.pem")
+		data, err := os.ReadFile("private.pem")
 		if err != nil {
 			log.Errorf("failed to read private.pem file: %s", err)
 			return
