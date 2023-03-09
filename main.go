@@ -54,7 +54,7 @@ func main() {
 	viper.SetEnvPrefix("FAKE_JWT_SERVER")
 	viper.AutomaticEnv()
 
-	viper.SetDefault(DefaultIssuerConfigKey, "http://localhost:8080")
+	viper.SetDefault(DefaultIssuerConfigKey, "http://localhost:8080/")
 	viper.SetDefault(DefaultSubjectConfigKey, "auth0|fb8618e6-8639-454d-9f94-4496b0b224a8")
 	viper.SetDefault(DefaultAudienceConfigKey, "http://localhost:3000")
 	viper.SetDefault(DefaultScopeConfigKey, "openid profile email")
