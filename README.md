@@ -21,3 +21,18 @@ The server will listen on <http://0.0.0.0:8080>. To use a newly generated RSA ke
 ```shell
 FAKE_JWT_SERVER_GENERATE_RSA_KEY=true go run main.go
 ```
+
+You could get a signed JWT that expires in ~1 year like so.
+
+```shell
+curl -X POST \
+     -H "Content-Type: multipart/form-data" \
+     -F "sub=fb8618e6-8639-454d-9f94-4496b0b224a8" \
+     -F "scope=openid profile email" \
+     -F "iat=$(date +%s)" \
+     -F "exp=$(($(date +%s) + 31536000))" \
+     -F "iss=http://localhost:8080" \
+     -F "azp=example-azp" \
+     -F "aud=http://localhost:3000" \
+     http://localhost:8080/authorize
+```
