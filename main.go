@@ -109,12 +109,12 @@ func main() {
 	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Infof("%s %s", r.Method, r.URL.Path)
+		log.Infof("%s %s from %s", r.Method, r.URL.Path, r.RemoteAddr)
 		http.Redirect(w, r, "/authorize", http.StatusSeeOther)
 	})
 
 	http.HandleFunc("/.well-known/jwks.json", func(w http.ResponseWriter, r *http.Request) {
-		log.Infof("%s %s", r.Method, r.URL.Path)
+		log.Infof("%s %s from %s", r.Method, r.URL.Path, r.RemoteAddr)
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprint(w, jwks)
 	})
@@ -122,7 +122,7 @@ func main() {
 	tmpl := template.Must(template.ParseFiles("form.html"))
 
 	http.HandleFunc("/authorize", func(w http.ResponseWriter, r *http.Request) {
-		log.Infof("%s %s", r.Method, r.URL.Path)
+		log.Infof("%s %s from %s", r.Method, r.URL.Path, r.RemoteAddr)
 		if r.Method == "GET" {
 			audience := r.FormValue("audience")
 			if audience == "" {
