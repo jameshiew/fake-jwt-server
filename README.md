@@ -27,7 +27,7 @@ You could get a signed JWT that expires in ~1 year like so.
 ```shell
 curl -X POST \
      -H "Content-Type: multipart/form-data" \
-     -F "sub=fb8618e6-8639-454d-9f94-4496b0b224a8" \
+     -F "sub=auth0|fb8618e6-8639-454d-9f94-4496b0b224a8" \
      -F "scope=openid profile email" \
      -F "iat=$(date +%s)" \
      -F "exp=$(($(date +%s) + 31536000))" \

@@ -46,7 +46,7 @@ func main() {
 	viper.AutomaticEnv()
 
 	viper.SetDefault("issuer", "http://localhost:8080")
-	viper.SetDefault("subject", "fb8618e6-8639-454d-9f94-4496b0b224a8")
+	viper.SetDefault("subject", "auth0|fb8618e6-8639-454d-9f94-4496b0b224a8")
 	viper.SetDefault("audience", "http://localhost:3000")
 	viper.SetDefault("scope", "openid profile email")
 	viper.SetDefault("authorizing_party", "example-azp")
