@@ -13,13 +13,13 @@ Small HTTP service that is meant to approximate some parts of the [Auth0 browser
 ## Quickstart
 
 ```shell
-go run main.go
+go run cmd/fake-jwt-server/main.go
 ```
 
 The server will listen on <http://0.0.0.0:8080>. To use a newly generated RSA key for the JWKS:
 
 ```shell
-FAKE_JWT_SERVER_GENERATE_RSA_KEY=true go run main.go
+FAKE_JWT_SERVER_GENERATE_RSA_KEY=true go run cmd/fake-jwt-server/main.go
 ```
 
 You could get a signed JWT that expires in ~1 year like so.
