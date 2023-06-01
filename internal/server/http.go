@@ -81,7 +81,9 @@ func (s *Server) defaultHandler(w http.ResponseWriter, r *http.Request) {
 func (s *Server) jwksHandler(w http.ResponseWriter, r *http.Request) {
 	log.Infof("%s %s from %s", r.Method, r.URL.Path, r.RemoteAddr)
 	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprint(w, s.JWKS)
+	if _, err := fmt.Fprint(w, s.JWKS); err != nil {
+		log.Warnf("Error writing response: %v", err)
+	}
 }
 
 func (s *Server) authorizeHandler(w http.ResponseWriter, r *http.Request) {
@@ -115,11 +117,18 @@ func (s *Server) authorizeHandler(w http.ResponseWriter, r *http.Request) {
 			Expiry:           expiry.Unix(),
 		}
 		w.Header().Set("Content-Type", "text/html")
-		s.Template.Execute(w, jwt)
+		if err := s.Template.Execute(w, jwt); err != nil {
+			log.Warnf("Couldn't execute template: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 	if r.Method == "POST" {
-		r.ParseMultipartForm(1024 * 1024)
+		if err := r.ParseMultipartForm(1024 * 1024); err != nil {
+			log.Warnf("Couldn't parse form data: %v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 		if r.MultipartForm == nil {
 			log.Warn("No form data")
 			w.WriteHeader(http.StatusBadRequest)
@@ -149,8 +158,18 @@ func (s *Server) authorizeHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		hdrs := jws.NewHeaders()
-		hdrs.Set(jws.TypeKey, "JWT")
-		hdrs.Set(jws.KeyIDKey, "123")
+		hdrsData := map[string]string{
+			jws.TypeKey:  "JWT",
+			jws.KeyIDKey: "123",
+		}
+		for key, value := range hdrsData {
+			if err := hdrs.Set(key, value); err != nil {
+				log.Warnf("Failed to set JWT header %s: %v", key, err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+		}
+
 		jwtJson, err := json.Marshal(jwt)
 		if err != nil {
 			log.Warn("failed to marshal JWT", err)
@@ -168,7 +187,9 @@ func (s *Server) authorizeHandler(w http.ResponseWriter, r *http.Request) {
 		if redirectURI == "" {
 			// if no redirect is specifed, we just return the JWT
 			w.Header().Set("Content-Type", "text/plain")
-			w.Write(buf)
+			if _, err := w.Write(buf); err != nil {
+				log.Warnf("Error writing response: %v", err)
+			}
 			return
 		}
 		redirectURI = redirectURI + "#access_token=" + string(buf)
