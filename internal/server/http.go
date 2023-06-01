@@ -92,9 +92,9 @@ func (s *Server) authorizeHandler(w http.ResponseWriter, r *http.Request) {
 			audience = s.Config.DefaultAudience
 		}
 
-		authorizing_party := r.FormValue("client_id")
-		if authorizing_party == "" {
-			authorizing_party = s.Config.DefaultAuthorizingParty
+		authorizingParty := r.FormValue("client_id")
+		if authorizingParty == "" {
+			authorizingParty = s.Config.DefaultAuthorizingParty
 		}
 
 		scope := r.FormValue("scope")
@@ -109,7 +109,7 @@ func (s *Server) authorizeHandler(w http.ResponseWriter, r *http.Request) {
 			Issuer:           s.Config.DefaultIssuer,
 			Subject:          s.Config.DefaultSubject,
 			Audience:         audience,
-			AuthorizingParty: authorizing_party,
+			AuthorizingParty: authorizingParty,
 			Scope:            scope,
 			IssuedAt:         issuedAt.Unix(),
 			Expiry:           expiry.Unix(),
@@ -164,14 +164,14 @@ func (s *Server) authorizeHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		log.Debug("Signed JWT: ", string(buf))
 
-		redirect_uri := r.FormValue("redirect_uri")
-		if redirect_uri == "" {
+		redirectURI := r.FormValue("redirect_uri")
+		if redirectURI == "" {
 			// if no redirect is specifed, we just return the JWT
 			w.Header().Set("Content-Type", "text/plain")
 			w.Write(buf)
 			return
 		}
-		redirect_uri = redirect_uri + "#access_token=" + string(buf)
-		http.Redirect(w, r, redirect_uri, http.StatusSeeOther)
+		redirectURI = redirectURI + "#access_token=" + string(buf)
+		http.Redirect(w, r, redirectURI, http.StatusSeeOther)
 	}
 }
