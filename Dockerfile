@@ -6,6 +6,7 @@ COPY go.sum .
 RUN go mod download -x
 
 COPY cmd/ cmd/
+COPY internal/ internal/
 RUN go build -o fake-jwt-server cmd/fake-jwt-server/main.go
 
 FROM alpine:3.17
