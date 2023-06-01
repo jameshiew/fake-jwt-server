@@ -35,14 +35,14 @@
 </form>
 <script>
   const params = new URLSearchParams(document.location.search);
-  const redirect_uri = params.get("redirect_uri");
-  if (redirect_uri === null) {
-    document.getElementById("info").innerHTML =
+  const redirectUri = params.get("redirect_uri");
+  if (redirectUri === null) {
+    document.getElementById("info").innerText =
             "No `redirect_uri` query param - submitting this form will respond with the signed JWT";
   } else {
-    document.getElementById("info").innerHTML =
+    document.getElementById("info").innerText =
             "`redirect_uri` present - submitting this form will redirect to " +
-            redirect_uri;
+            redirectUri;
   }
 </script>
 </body>
