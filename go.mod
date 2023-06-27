@@ -2,11 +2,12 @@ module github.com/jameshiew/fake-jwt-server
 
 go 1.20
 
-require github.com/lestrrat-go/jwx/v2 v2.0.9
+require github.com/lestrrat-go/jwx/v2 v2.0.11
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/segmentio/asm v1.2.0 // indirect
 )
 
 require (
